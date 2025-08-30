@@ -131,16 +131,16 @@ describe("WalletList", () => {
       const wallet = createMockWallet();
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      expect(screen.getByRole("button", { name: /copy address/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /reveal key/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /remove/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /copy.*address/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /show.*private.*key.*form/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /remove.*wallet/i })).toBeInTheDocument();
     });
 
     it("should call onRemove when remove button clicked", () => {
       const wallet = createMockWallet();
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      fireEvent.click(screen.getByRole("button", { name: /remove/i }));
+      fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
 
       expect(mockOnRemove).toHaveBeenCalledWith(wallet.id);
     });
@@ -149,7 +149,7 @@ describe("WalletList", () => {
       const wallet = createMockWallet();
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      fireEvent.click(screen.getByRole("button", { name: /copy address/i }));
+      fireEvent.click(screen.getByRole("button", { name: /copy.*address/i }));
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(wallet.address);
     });
@@ -160,10 +160,10 @@ describe("WalletList", () => {
 
       expect(screen.queryByText(/enter password to reveal/i)).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: /reveal key/i }));
+      fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
 
       expect(screen.getByText(/enter password to reveal/i)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /hide/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /hide.*private.*key.*form/i })).toBeInTheDocument();
     });
   });
 
@@ -195,7 +195,7 @@ describe("WalletList", () => {
       const wallet = createMockWallet();
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      expect(screen.getAllByText("—")).toHaveLength(2);
+      expect(screen.getAllByText(/failed to load/i)).toHaveLength(2);
     });
 
     it("should show balance data", () => {
@@ -221,7 +221,7 @@ describe("WalletList", () => {
       const wallet = createMockWallet();
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      fireEvent.click(screen.getByRole("button", { name: /reveal key/i }));
+      fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
 
       expect(screen.getByLabelText(/enter password to reveal/i)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /^reveal$/i })).toBeInTheDocument();
@@ -235,7 +235,7 @@ describe("WalletList", () => {
 
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      fireEvent.click(screen.getByRole("button", { name: /reveal key/i }));
+      fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
       fireEvent.change(screen.getByLabelText(/enter password to reveal/i), { target: { value: "password123" } });
       fireEvent.click(screen.getByRole("button", { name: /^reveal$/i }));
 
@@ -244,7 +244,7 @@ describe("WalletList", () => {
       });
 
       expect(decryptToString).toHaveBeenCalledWith(wallet.enc, "password123");
-      expect(screen.getAllByText(/private key/i)).toHaveLength(2); // Label and header
+      expect(screen.getAllByText(/private key/i)).toHaveLength(2);
       expect(screen.getByRole("button", { name: /copy key/i })).toBeInTheDocument();
     });
 
@@ -255,7 +255,7 @@ describe("WalletList", () => {
 
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      fireEvent.click(screen.getByRole("button", { name: /reveal key/i }));
+      fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
       fireEvent.change(screen.getByLabelText(/enter password to reveal/i), { target: { value: "wrongpassword" } });
       fireEvent.click(screen.getByRole("button", { name: /^reveal$/i }));
 
@@ -274,7 +274,7 @@ describe("WalletList", () => {
 
       render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
-      fireEvent.click(screen.getByRole("button", { name: /reveal key/i }));
+      fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
       fireEvent.change(screen.getByLabelText(/enter password to reveal/i), { target: { value: "password123" } });
       fireEvent.click(screen.getByRole("button", { name: /^reveal$/i }));
 
@@ -303,7 +303,7 @@ describe("WalletList", () => {
 
       render(<WalletList wallets={wallets} onRemove={mockOnRemove} />);
 
-      const revealButtons = screen.getAllByRole("button", { name: /reveal key/i });
+      const revealButtons = screen.getAllByRole("button", { name: /show.*private.*key.*form/i });
       expect(revealButtons).toHaveLength(2);
 
       fireEvent.click(revealButtons[0]);

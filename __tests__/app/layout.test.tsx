@@ -9,7 +9,7 @@ describe("RootLayout", () => {
         <div data-testid="test-child">Test Content</div>
       </RootLayout>
     );
-    
+
     expect(getByTestId("test-child")).toBeInTheDocument();
     expect(getByTestId("test-child")).toHaveTextContent("Test Content");
   });

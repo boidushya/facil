@@ -18,6 +18,8 @@ export default function CreateWalletForm({ onCreated }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isFormValid = password.length >= 8 && password === confirm;
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -78,11 +80,17 @@ export default function CreateWalletForm({ onCreated }: Props) {
           type="password"
           className="input"
           placeholder="At least 8 characters"
+          minLength={8}
           value={password}
           onChange={e => setPassword(e.target.value)}
           autoComplete="new-password"
           required
         />
+        {password && password.length < 8 && (
+          <p role="alert" className="error text-sm">
+            Password must be at least 8 characters
+          </p>
+        )}
       </div>
 
       <div className="form-group">
@@ -93,11 +101,17 @@ export default function CreateWalletForm({ onCreated }: Props) {
           id="confirm"
           type="password"
           className="input"
+          placeholder="Re-enter your password"
           value={confirm}
           onChange={e => setConfirm(e.target.value)}
           autoComplete="new-password"
           required
         />
+        {confirm && password !== confirm && (
+          <p role="alert" className="error text-sm">
+            Passwords do not match
+          </p>
+        )}
       </div>
 
       {error ? (
@@ -106,7 +120,7 @@ export default function CreateWalletForm({ onCreated }: Props) {
         </p>
       ) : null}
 
-      <button type="submit" disabled={busy} className="btn btn-primary">
+      <button type="submit" disabled={busy || !isFormValid} className="btn btn-primary">
         {busy ? "Generating…" : "Generate wallet"}
       </button>
     </form>

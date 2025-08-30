@@ -319,5 +319,4 @@ describe("useBalances hook", () => {
       expect(rerenderedKeys).toEqual(initialKeys);
     });
   });
-
 });

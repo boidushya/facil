@@ -46,7 +46,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :root{
-	--color-bg: oklch(0.08 0.01 0);
+	--color-bg: oklab(7.858% 0.01271 -0.00342);
 	--color-bg-alt: oklch(12.284% 0.00975 359.749);
 	--color-fg: oklch(0.95 0.01 0);
 	--color-fg-alt: oklch(0.65 0.01 0);
@@ -146,8 +146,8 @@ body{
 
 .input {
 	width: 100%;
-	padding: 0.75rem;
-	font-size: 1rem;
+	padding: 0.25rem 0.5rem;
+	font-size: .875rem;
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-sm);
 	background-color: var(--color-bg-alt);
@@ -262,6 +262,14 @@ body{
 	font-size: 0.75rem;
 }
 
+.text-danger{
+	color: var(--color-danger);
+}
+
+.text-success{
+	color: var(--color-success);
+}
+
 .text-sm {
 	font-size: 0.875rem;
 }
@@ -310,6 +318,30 @@ body{
 	color: var(--color-fg);
 }
 
+.copy-feedback {
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	background-color: rgba(0, 200, 83, 0.1);
+	border: 1px solid rgba(0, 200, 83, 0.2);
+	border-radius: var(--radius-sm);
+	animation: fadeInOut 2s;
+}
+
+.security-warning {
+	padding: 0.5rem;
+	background-color: rgba(255, 59, 48, 0.1);
+	border: 1px solid rgba(255, 59, 48, 0.2);
+	border-radius: var(--radius-sm);
+	margin-bottom: 0.5rem;
+}
+
+@keyframes fadeInOut {
+	0% { opacity: 0; transform: translateY(-16px); }
+	10% { opacity: 1; transform: translateY(0); }
+	90% { opacity: 1; transform: translateY(0); }
+	100% { opacity: 0; transform: translateY(-16px); }
+}
+
 @media (max-width: 640px) {
 	.container {
 		padding: 1rem;
@@ -335,6 +367,16 @@ body{
 	
 	.row {
 		flex-wrap: wrap;
+	}
+	
+	.reveal-form .row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	
+	.reveal-form .btn {
+		width: 100%;
+		justify-content: center;
 	}
 }
 
@@ -391,7 +433,7 @@ body{
 	align-items: center;
 	justify-content: space-between;
 	padding: 1.5rem 1.5rem 0;
-	margin-bottom: 1rem;
+	margin-bottom: 1.5rem;
 }
 
 .modal-title {
@@ -415,5 +457,9 @@ body{
 }
 
 .modal-content .card {
-	margin: 0 1.5rem 1.5rem;
+	margin: 0;
+	background-color: transparent;
+	border-radius: 0;
+	border: none;
+	border-top: 1px solid var(--color-border);
 }
