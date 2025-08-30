@@ -1,28 +1,28 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { type StoredWallet, getWallets, saveWallets } from "@/lib/storage"
+import { useEffect, useState } from "react";
+import { type StoredWallet, getWallets, saveWallets } from "@/lib/storage";
 
 export function useWallets() {
-  const [wallets, setWallets] = useState<StoredWallet[]>([])
+  const [wallets, setWallets] = useState<StoredWallet[]>([]);
 
   useEffect(() => {
     // Load from localStorage on mount
-    setWallets(getWallets())
-  }, [])
+    setWallets(getWallets());
+  }, []);
 
   useEffect(() => {
     // Persist whenever wallets change
-    saveWallets(wallets)
-  }, [wallets])
+    saveWallets(wallets);
+  }, [wallets]);
 
   function addWallet(w: StoredWallet) {
-    setWallets((prev) => [w, ...prev])
+    setWallets(prev => [w, ...prev]);
   }
 
   function removeWallet(id: string) {
-    setWallets((prev) => prev.filter((w) => w.id !== id))
+    setWallets(prev => prev.filter(w => w.id !== id));
   }
 
-  return { wallets, addWallet, removeWallet }
+  return { wallets, addWallet, removeWallet };
 }
