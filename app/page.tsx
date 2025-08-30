@@ -1,103 +1,98 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import CreateWalletForm from "@/components/wallet/create-wallet-form";
+import WalletList from "@/components/wallet/wallet-list";
+import { useWallets } from "@/hooks/use-wallets";
+import { useState } from "react";
+
+export default function Page() {
+  const { wallets, addWallet, removeWallet } = useWallets();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <main className="container">
+      <header className="page-header">
+        <h1 className="title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              fillOpacity=".25"
+              d="M3 10c0-2.828 0-4.243.879-5.121C4.757 4 6.172 4 9 4h6c2.828 0 4.243 0 5.121.879C21 5.757 21 7.172 21 10v1.7c0 .141 0 .212-.044.256S20.841 12 20.7 12h-4.2c-.465 0-.697 0-.89.038a2 2 0 0 0-1.572 1.572c-.038.193-.038.425-.038.89s0 .697.038.89a2 2 0 0 0 1.572 1.572c.193.038.425.038.89.038h4.357c.079 0 .143.064.143.143A2.857 2.857 0 0 1 18.143 20H9c-2.828 0-4.243 0-5.121-.879C3 18.243 3 16.828 3 14z"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <path
+              fill="currentColor"
+              d="M14 14a2 2 0 0 1 2-2h4.85a.15.15 0 0 1 .15.15v4.7a.15.15 0 0 1-.15.15H16a2 2 0 0 1-2-2z"
+            />
+            <rect width="6" height="1" x="6" y="7" fill="currentColor" rx=".5" />
+          </svg>
+          <span>Fácil - Your Wallet Keeper</span>
+        </h1>
+        <p className="lead muted">
+          Generate EVM-compatible wallets, store them securely, and view balances on testnets. Private keys are
+          encrypted with your password and stored in your browser only.
+        </p>
+      </header>
+
+      <section aria-labelledby="list-heading" className="section">
+        <div className="section-header">
+          <h2 id="list-heading" className="section-title">
+            Your wallets
+          </h2>
+          <button
+            className="btn btn-primary btn-icon"
+            onClick={() => setShowCreateModal(true)}
+            aria-label="Create new wallet"
           >
-            Read our docs
-          </a>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <WalletList wallets={wallets} onRemove={removeWallet} />
+      </section>
+
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Create a wallet</h2>
+              <button
+                className="btn btn-icon modal-close"
+                onClick={() => setShowCreateModal(false)}
+                aria-label="Close modal"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <CreateWalletForm
+              onCreated={wallet => {
+                addWallet(wallet);
+                setShowCreateModal(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </main>
   );
 }
