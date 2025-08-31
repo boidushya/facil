@@ -160,6 +160,15 @@ body {
 	opacity: 0.875;
 }
 
+.truncate{
+	display: inline-block;
+	vertical-align: bottom;
+	max-width: 40px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /* -- CARD COMPONENTS -- */
 
 .card {
@@ -836,6 +845,22 @@ body {
   .card {
     padding: 1rem;
   }
+
+	.truncate{
+		max-width: 200px;
+	}
+}
+
+/* -- AVATAR STYLES -- */
+
+.avatar {
+	height: 36px;
+	width: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+	margin-right: 0.5rem;
+	mask-image: radial-gradient(circle at 12px 12px, rgba(0,0,0,1), rgba(0,0,0,0.1));
 }
 
 @media (max-width: 480px) {

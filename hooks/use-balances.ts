@@ -58,7 +58,5 @@ async function fetchBalances(key: [string, `0x${string}`]) {
 export function useBalances(address: string) {
   const isHex = address && /^0x[a-fA-F0-9]{40}$/.test(address);
 
-  return useSWR(isHex ? ["balances", address as `0x${string}`] : null, fetchBalances, {
-    revalidateOnFocus: false,
-  });
+  return useSWR(isHex ? ["balances", address as `0x${string}`] : null, fetchBalances);
 }

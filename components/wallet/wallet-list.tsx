@@ -7,7 +7,7 @@ import PressHoldModal from "@/components/wallet/press-hold-modal";
 import { useBalances } from "@/hooks/use-balances";
 import { decryptToString } from "@/lib/crypto";
 import type { StoredWallet } from "@/lib/storage";
-import { formatRelativeTime, shortenAddress } from "@/lib/utils";
+import { formatRelativeTime, generateAvatarColor, shortenAddress } from "@/lib/utils";
 import { memo, useCallback, useState } from "react";
 
 type Props = {
@@ -82,19 +82,26 @@ const WalletItem = memo(function WalletItem({ w, onRemove }: { w: StoredWallet; 
   return (
     <li className="card">
       <div className="row row-between gap-4">
-        <div>
-          <p className="text-sm font-semibold">
-            {w.label ? (
-              <>
-                {w.label}
-                <span className="muted-low">・</span>
-              </>
-            ) : (
-              ""
-            )}
-            <span className={`mono text-xs ${w.label ? "muted" : "font-semibold"}`}>{shortenAddress(w.address)}</span>
-          </p>
-          <p className="text-xs muted-high">Created {formatRelativeTime(w.createdAt)}</p>
+        <div className="row gap-3">
+          <div
+            className="avatar"
+            style={{ backgroundColor: generateAvatarColor(w.address) }}
+            aria-label={`Profile picture for ${w.label || shortenAddress(w.address)}`}
+          />
+          <div>
+            <p className="text-sm font-semibold">
+              {w.label ? (
+                <>
+                  <span className="truncate">{w.label}</span>
+                  <span className="muted-low">・</span>
+                </>
+              ) : (
+                ""
+              )}
+              <span className={`mono text-xs ${w.label ? "muted" : "font-semibold"}`}>{shortenAddress(w.address)}</span>
+            </p>
+            <p className="text-xs muted-high">Created {formatRelativeTime(w.createdAt)}</p>
+          </div>
         </div>
         <div className="row gap-2">
           <button

@@ -55,7 +55,7 @@ describe("useBalances hook", () => {
 
       renderHook(() => useBalances("invalid-address"));
 
-      expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function), { revalidateOnFocus: false });
+      expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function));
     });
 
     it("should not fetch for empty address", () => {
@@ -70,7 +70,7 @@ describe("useBalances hook", () => {
 
       renderHook(() => useBalances(""));
 
-      expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function), { revalidateOnFocus: false });
+      expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function));
     });
 
     it("should fetch for valid hex address", () => {
@@ -89,9 +89,7 @@ describe("useBalances hook", () => {
 
       renderHook(() => useBalances(validAddress));
 
-      expect(mockSWR).toHaveBeenCalledWith(["balances", validAddress], expect.any(Function), {
-        revalidateOnFocus: false,
-      });
+      expect(mockSWR).toHaveBeenCalledWith(["balances", validAddress], expect.any(Function));
     });
 
     it("should validate address format correctly", () => {
@@ -121,11 +119,9 @@ describe("useBalances hook", () => {
         const isValidHex = /^0x[a-fA-F0-9]{40}$/.test(address);
 
         if (isValidHex) {
-          expect(mockSWR).toHaveBeenCalledWith(["balances", address], expect.any(Function), {
-            revalidateOnFocus: false,
-          });
+          expect(mockSWR).toHaveBeenCalledWith(["balances", address], expect.any(Function));
         } else {
-          expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function), { revalidateOnFocus: false });
+          expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function));
         }
 
         vi.clearAllMocks();
@@ -207,25 +203,8 @@ describe("useBalances hook", () => {
 
       expect(mockSWR).toHaveBeenCalledWith(
         ["balances", "0x742d35Cc6634C0532925a3b8D8f5e3E56F123456"],
-        expect.any(Function),
-        { revalidateOnFocus: false }
+        expect.any(Function)
       );
-    });
-
-    it("should not revalidate on focus", () => {
-      const mockSWR = vi.fn().mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        error: undefined,
-        mutate: vi.fn(),
-        isValidating: false,
-      });
-      vi.mocked(mockUseSWR.default).mockImplementation(mockSWR);
-
-      renderHook(() => useBalances("0x742d35Cc6634C0532925a3b8D8f5e3E56F1234567"));
-
-      const [, , options] = mockSWR.mock.calls[0];
-      expect(options.revalidateOnFocus).toBe(false);
     });
   });
 
@@ -247,13 +226,11 @@ describe("useBalances hook", () => {
 
       const { rerender } = renderHook(({ addr }) => useBalances(addr), { initialProps: { addr: address1 } });
 
-      expect(mockSWR).toHaveBeenCalledWith(["balances", address1], expect.any(Function), { revalidateOnFocus: false });
+      expect(mockSWR).toHaveBeenCalledWith(["balances", address1], expect.any(Function));
 
       rerender({ addr: address2 });
 
-      expect(mockSWR).toHaveBeenLastCalledWith(["balances", address2], expect.any(Function), {
-        revalidateOnFocus: false,
-      });
+      expect(mockSWR).toHaveBeenLastCalledWith(["balances", address2], expect.any(Function));
     });
 
     it("should handle valid to invalid address change", () => {
@@ -273,13 +250,11 @@ describe("useBalances hook", () => {
 
       const { rerender } = renderHook(({ addr }) => useBalances(addr), { initialProps: { addr: validAddress } });
 
-      expect(mockSWR).toHaveBeenCalledWith(["balances", validAddress], expect.any(Function), {
-        revalidateOnFocus: false,
-      });
+      expect(mockSWR).toHaveBeenCalledWith(["balances", validAddress], expect.any(Function));
 
       rerender({ addr: invalidAddress });
 
-      expect(mockSWR).toHaveBeenLastCalledWith(null, expect.any(Function), { revalidateOnFocus: false });
+      expect(mockSWR).toHaveBeenLastCalledWith(null, expect.any(Function));
     });
   });
 

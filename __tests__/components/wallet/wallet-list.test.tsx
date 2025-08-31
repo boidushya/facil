@@ -18,6 +18,7 @@ vi.mock("@/lib/crypto", () => ({
 vi.mock("@/lib/utils", () => ({
   shortenAddress: vi.fn((addr: string) => `${addr.slice(0, 6)}…${addr.slice(-4)}`),
   formatRelativeTime: vi.fn((_date: Date | string) => "2d ago"),
+  generateAvatarColor: vi.fn((address: string) => `hsl(${address.slice(-2)}, 50%, 60%)`),
 }));
 
 // -- Mock navigator.clipboard --

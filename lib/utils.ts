@@ -23,3 +23,25 @@ export function formatRelativeTime(date: Date | string): string {
   if (diffMonth < 12) return `${diffMonth}mo ago`;
   return `${diffYear}y ago`;
 }
+
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+function generateSeededColor(seed: string): string {
+  const hash = hashString(seed);
+  const hue = hash % 360;
+  const saturation = 45 + (hash % 30); // 45-75%
+  const lightness = 50 + (hash % 20); // 50-70%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+export function generateAvatarColor(address: string): string {
+  return generateSeededColor(address.toLowerCase());
+}
