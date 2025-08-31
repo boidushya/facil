@@ -11,11 +11,28 @@ vi.mock("@/hooks/use-wallets", () => ({
 }));
 
 vi.mock("@/components/wallet/create-wallet-form", () => ({
-  default: vi.fn(({ onCreated }) => (
-    <div data-testid="create-wallet-form">
-      <button onClick={() => onCreated({ id: "test", address: "0x123" })}>Create Wallet</button>
-    </div>
-  )),
+  default: vi.fn(({ isOpen, onClose, onCreated }) =>
+    isOpen ? (
+      <div className="modal-overlay" onClick={() => onClose()}>
+        <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <h2>Create a wallet</h2>
+          <button aria-label="Close modal" onClick={onClose}>
+            Close
+          </button>
+          <div data-testid="create-wallet-form">
+            <button
+              onClick={() => {
+                onCreated({ id: "test", address: "0x123" });
+                onClose();
+              }}
+            >
+              Create Wallet
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null
+  ),
 }));
 
 vi.mock("@/components/wallet/wallet-list", () => ({

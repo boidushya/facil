@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import React, { createContext, memo, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
 type ToastType = "success" | "error" | "info";
 
@@ -27,7 +27,7 @@ export function useToast() {
   return context;
 }
 
-function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
+const ToastItem = memo(function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
   const [isExiting, setIsExiting] = useState(false);
 
   const handleRemove = useCallback(() => {
@@ -127,7 +127,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
       </div>
     </div>
   );
-}
+});
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);

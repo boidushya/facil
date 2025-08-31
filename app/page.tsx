@@ -3,11 +3,21 @@
 import CreateWalletForm from "@/components/wallet/create-wallet-form";
 import WalletList from "@/components/wallet/wallet-list";
 import { useWallets } from "@/hooks/use-wallets";
-import { useState } from "react";
+import type { StoredWallet } from "@/lib/storage";
+import { useCallback, useState } from "react";
 
 export default function Page() {
   const { wallets, addWallet, removeWallet, isLoading } = useWallets();
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const openModal = useCallback(() => setShowCreateModal(true), []);
+  const closeModal = useCallback(() => setShowCreateModal(false), []);
+  const handleWalletCreated = useCallback(
+    (wallet: StoredWallet) => {
+      addWallet(wallet);
+    },
+    [addWallet]
+  );
 
   return (
     <main className="container">
@@ -38,11 +48,7 @@ export default function Page() {
           <h2 id="list-heading" className="section-title">
             Your wallets
           </h2>
-          <button
-            className="btn btn-primary btn-icon"
-            onClick={() => setShowCreateModal(true)}
-            aria-label="Create new wallet"
-          >
+          <button className="btn btn-primary btn-icon" onClick={openModal} aria-label="Create new wallet">
             <svg
               width="20"
               height="20"
@@ -62,39 +68,7 @@ export default function Page() {
         </div>
       </section>
 
-      {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">Create a wallet</h2>
-              <button
-                className="btn btn-icon modal-close"
-                onClick={() => setShowCreateModal(false)}
-                aria-label="Close modal"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <CreateWalletForm
-              onCreated={wallet => {
-                addWallet(wallet);
-                setShowCreateModal(false);
-              }}
-            />
-          </div>
-        </div>
-      )}
+      <CreateWalletForm isOpen={showCreateModal} onClose={closeModal} onCreated={handleWalletCreated} />
     </main>
   );
 }

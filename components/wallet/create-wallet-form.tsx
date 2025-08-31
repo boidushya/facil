@@ -4,19 +4,29 @@ import type React from "react";
 
 import { encryptString } from "@/lib/crypto";
 import type { StoredWallet } from "@/lib/storage";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 type Props = {
+  isOpen: boolean;
+  onClose: () => void;
   onCreated: (wallet: StoredWallet) => void;
 };
 
-export default function CreateWalletForm({ onCreated }: Props) {
+function CreateWalletForm({ isOpen, onClose, onCreated }: Props) {
   const [label, setLabel] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasData = label.trim() || password.trim() || confirm.trim();
+
+  const handleOverlayClick = () => {
+    if (!hasData) {
+      onClose();
+    }
+  };
 
   const isFormValid = password.length >= 8 && password === confirm;
 
@@ -49,6 +59,7 @@ export default function CreateWalletForm({ onCreated }: Props) {
       setLabel("");
       setPassword("");
       setConfirm("");
+      onClose();
     } catch (_err) {
       setError("Failed to create wallet. Please try again.");
     } finally {
@@ -56,73 +67,98 @@ export default function CreateWalletForm({ onCreated }: Props) {
     }
   }
 
+  if (!isOpen) return null;
+
   return (
-    <form onSubmit={handleCreate} className="card">
-      <div className="form-group">
-        <label htmlFor="label" className="label">
-          Label (optional)
-        </label>
-        <input
-          id="label"
-          className="input"
-          placeholder="Personal, Savings, etc."
-          value={label}
-          onChange={e => setLabel(e.target.value)}
-        />
+    <div className="modal-overlay" onClick={handleOverlayClick}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Create a wallet</h2>
+          <button className="btn btn-icon modal-close" onClick={onClose} aria-label="Close modal">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <form onSubmit={handleCreate} className="card">
+          <div className="form-group">
+            <label htmlFor="label" className="label">
+              Label (optional)
+            </label>
+            <input
+              id="label"
+              className="input"
+              placeholder="Personal, Savings, etc."
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password" className="label">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              className="input"
+              placeholder="At least 8 characters"
+              minLength={8}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+            {password && password.length < 8 && (
+              <p role="alert" className="error text-sm">
+                Password must be at least 8 characters
+              </p>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirm" className="label">
+              Confirm password
+            </label>
+            <input
+              id="confirm"
+              type="password"
+              className="input"
+              placeholder="Re-enter your password"
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+            {confirm && password !== confirm && (
+              <p role="alert" className="error text-sm">
+                Passwords do not match
+              </p>
+            )}
+          </div>
+
+          {error ? (
+            <p role="alert" className="error text-sm">
+              {error}
+            </p>
+          ) : null}
+
+          <button type="submit" disabled={busy || !isFormValid} className="btn btn-primary">
+            {busy ? "Generating…" : "Generate wallet"}
+          </button>
+        </form>
       </div>
-
-      <div className="form-group">
-        <label htmlFor="password" className="label">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          className="input"
-          placeholder="At least 8 characters"
-          minLength={8}
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          autoComplete="new-password"
-          required
-        />
-        {password && password.length < 8 && (
-          <p role="alert" className="error text-sm">
-            Password must be at least 8 characters
-          </p>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="confirm" className="label">
-          Confirm password
-        </label>
-        <input
-          id="confirm"
-          type="password"
-          className="input"
-          placeholder="Re-enter your password"
-          value={confirm}
-          onChange={e => setConfirm(e.target.value)}
-          autoComplete="new-password"
-          required
-        />
-        {confirm && password !== confirm && (
-          <p role="alert" className="error text-sm">
-            Passwords do not match
-          </p>
-        )}
-      </div>
-
-      {error ? (
-        <p role="alert" className="error text-sm">
-          {error}
-        </p>
-      ) : null}
-
-      <button type="submit" disabled={busy || !isFormValid} className="btn btn-primary">
-        {busy ? "Generating…" : "Generate wallet"}
-      </button>
-    </form>
+    </div>
   );
 }
+
+export default memo(CreateWalletForm);

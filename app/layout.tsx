@@ -25,6 +25,7 @@ export default function RootLayout({
           as="style"
         />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+        <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
       </head>
       <body>
         <ToastProvider>

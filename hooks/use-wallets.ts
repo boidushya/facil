@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { type StoredWallet, getWallets, saveWallets } from "@/lib/storage";
 
 export function useWallets() {
@@ -21,13 +21,13 @@ export function useWallets() {
     }
   }, [wallets, isLoading]);
 
-  function addWallet(w: StoredWallet) {
+  const addWallet = useCallback((w: StoredWallet) => {
     setWallets(prev => [w, ...prev]);
-  }
+  }, []);
 
-  function removeWallet(id: string) {
+  const removeWallet = useCallback((id: string) => {
     setWallets(prev => prev.filter(w => w.id !== id));
-  }
+  }, []);
 
   return { wallets, addWallet, removeWallet, isLoading };
 }

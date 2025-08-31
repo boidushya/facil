@@ -8,7 +8,7 @@ import { useBalances } from "@/hooks/use-balances";
 import { decryptToString } from "@/lib/crypto";
 import type { StoredWallet } from "@/lib/storage";
 import { formatRelativeTime, shortenAddress } from "@/lib/utils";
-import { useCallback, useState } from "react";
+import { memo, useCallback, useState } from "react";
 
 type Props = {
   wallets: StoredWallet[];
@@ -16,7 +16,7 @@ type Props = {
   isLoading?: boolean;
 };
 
-function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) => void }) {
+const WalletItem = memo(function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) => void }) {
   const { data, isLoading, error } = useBalances(w.address);
   const { addToast } = useToast();
 
@@ -47,13 +47,15 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
   }, [revealed, addToast]);
 
   const handleToggleReveal = useCallback(() => {
-    setShowReveal(s => !s);
-    if (showReveal) {
-      setPassword("");
-      setRevealed(null);
-      setRevealError(null);
-    }
-  }, [showReveal]);
+    setShowReveal(s => {
+      if (s) {
+        setPassword("");
+        setRevealed(null);
+        setRevealError(null);
+      }
+      return !s;
+    });
+  }, []);
 
   const handleDeleteWallet = useCallback(() => {
     onRemove(w.id);
@@ -81,7 +83,7 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
     <li className="card">
       <div className="row row-between gap-4">
         <div>
-          <p className="text-sm font-medium">
+          <p className="text-sm font-semibold">
             {w.label ? (
               <>
                 {w.label}
@@ -90,7 +92,7 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
             ) : (
               ""
             )}
-            <span className="muted mono text-xs">{shortenAddress(w.address)}</span>
+            <span className={`mono text-xs ${w.label ? "muted" : "font-semibold"}`}>{shortenAddress(w.address)}</span>
           </p>
           <p className="text-xs muted-high">Created {formatRelativeTime(w.createdAt)}</p>
         </div>
@@ -311,7 +313,13 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteWallet}
         title="Remove wallet"
-        description={`Are you sure you want to remove the wallet "${w.label || shortenAddress(w.address)}"? This action is permanent & cannot be undone.`}
+        description={
+          <>
+            Are you sure you want to remove the wallet{" "}
+            <code className="code">{w.label || shortenAddress(w.address)}</code>?<br /> This action is{" "}
+            <strong className="strong">permanent</strong> & <strong className="strong">cannot be undone.</strong>
+          </>
+        }
         confirmText="Hold to delete"
         holdDuration={1500}
         encryptedPayload={w.enc}
@@ -319,9 +327,9 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
       />
     </li>
   );
-}
+});
 
-export default function WalletList({ wallets, onRemove, isLoading = false }: Props) {
+const WalletList = memo(function WalletList({ wallets, onRemove, isLoading = false }: Props) {
   if (isLoading) {
     return (
       <div className="tetrominos" role="loader">
@@ -344,4 +352,6 @@ export default function WalletList({ wallets, onRemove, isLoading = false }: Pro
       ))}
     </ul>
   );
-}
+});
+
+export default WalletList;

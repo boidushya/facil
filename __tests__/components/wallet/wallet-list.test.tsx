@@ -159,7 +159,7 @@ describe("WalletList", () => {
       expect(screen.getByText("Remove wallet")).toBeInTheDocument();
       expect(screen.getByText(/are you sure you want to remove/i)).toBeInTheDocument();
       expect(screen.getByText("Enter password to enable deletion")).toBeInTheDocument();
-      expect(screen.getByText("Verify password to enable")).toBeInTheDocument();
+      expect(screen.getByText("Verify Password")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /verify/i })).toBeInTheDocument();
       expect(mockOnRemove).not.toHaveBeenCalled();
     });
@@ -365,59 +365,66 @@ describe("WalletList", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
 
-      const holdButton = screen.getByRole("button", { name: /press and hold to confirm deletion/i });
-      expect(holdButton).toBeDisabled();
-      expect(screen.getByText("Verify password to enable")).toBeInTheDocument();
+      expect(screen.getByText("Verify Password")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /press and hold to confirm deletion/i })).not.toBeInTheDocument();
+      const verifyButton = screen.getByRole("button", { name: /verify/i });
+      expect(verifyButton).toBeDisabled();
     });
 
     it("should show error for invalid password", async () => {
       vi.mocked(decryptToString).mockRejectedValue(new Error("Decryption failed"));
-      
+
       const wallet = createMockWallet();
       renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
-      fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), { target: { value: "wrongpassword" } });
+      fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), {
+        target: { value: "wrongpassword" },
+      });
       fireEvent.click(screen.getByRole("button", { name: /verify/i }));
 
       await waitFor(() => {
         expect(screen.getByRole("alert")).toHaveTextContent(/invalid password/i);
       });
-      
-      const holdButton = screen.getByRole("button", { name: /press and hold to confirm deletion/i });
-      expect(holdButton).toBeDisabled();
+
+      expect(screen.queryByRole("button", { name: /press and hold to confirm deletion/i })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /verify/i })).toBeInTheDocument();
     });
 
     it("should enable hold-to-delete after successful password verification", async () => {
       vi.mocked(decryptToString).mockResolvedValue("mock-private-key");
-      
+
       const wallet = createMockWallet();
       renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
-      fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), { target: { value: "correctpassword" } });
+      fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), {
+        target: { value: "correctpassword" },
+      });
       fireEvent.click(screen.getByRole("button", { name: /verify/i }));
 
       await waitFor(() => {
         const holdButton = screen.getByRole("button", { name: /press and hold to confirm deletion/i });
-        expect(holdButton).not.toBeDisabled();
+        expect(holdButton).toBeInTheDocument();
         expect(screen.getByText("Hold to delete")).toBeInTheDocument();
       });
-      
+
       expect(decryptToString).toHaveBeenCalledWith(wallet.enc, "correctpassword");
     });
 
     it("should hide password form after successful verification", async () => {
       vi.mocked(decryptToString).mockResolvedValue("mock-private-key");
-      
+
       const wallet = createMockWallet();
       renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
-      
+
       expect(screen.getByLabelText(/enter password to enable deletion/i)).toBeInTheDocument();
-      
-      fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), { target: { value: "correctpassword" } });
+
+      fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), {
+        target: { value: "correctpassword" },
+      });
       fireEvent.click(screen.getByRole("button", { name: /verify/i }));
 
       await waitFor(() => {
@@ -431,13 +438,13 @@ describe("WalletList", () => {
       renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
-      
+
       const verifyButton = screen.getByRole("button", { name: /verify/i });
       expect(verifyButton).toBeDisabled();
-      
+
       fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), { target: { value: "test" } });
       expect(verifyButton).not.toBeDisabled();
-      
+
       fireEvent.change(screen.getByLabelText(/enter password to enable deletion/i), { target: { value: "" } });
       expect(verifyButton).toBeDisabled();
     });

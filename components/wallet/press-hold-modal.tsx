@@ -3,21 +3,21 @@
 import { decryptToString } from "@/lib/crypto";
 import type { EncryptedPayload } from "@/lib/crypto";
 import type React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   confirmText?: string;
   holdDuration?: number;
   encryptedPayload?: EncryptedPayload;
   requirePassword?: boolean;
 };
 
-export default function PressHoldModal({
+function PressHoldModal({
   isOpen,
   onClose,
   onConfirm,
@@ -33,11 +33,12 @@ export default function PressHoldModal({
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordVerified, setPasswordVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
 
-  const requiredAndVerified = requirePassword && !passwordVerified;
+  const requiredAndVerified = useMemo(() => requirePassword && !passwordVerified, [requirePassword, passwordVerified]);
 
   const clearTimers = useCallback(() => {
     if (holdTimeoutRef.current) {
@@ -45,7 +46,7 @@ export default function PressHoldModal({
       holdTimeoutRef.current = null;
     }
     if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
+      cancelAnimationFrame(progressIntervalRef.current as unknown as number);
       progressIntervalRef.current = null;
     }
   }, []);
@@ -56,6 +57,7 @@ export default function PressHoldModal({
     setPassword("");
     setPasswordError(null);
     setPasswordVerified(false);
+    setVerifying(false);
     clearTimers();
   }, [clearTimers]);
 
@@ -77,12 +79,18 @@ export default function PressHoldModal({
       resetState();
     }, holdDuration);
 
-    progressIntervalRef.current = setInterval(() => {
+    const updateProgress = () => {
       const elapsed = Date.now() - startTimeRef.current;
       const newProgress = Math.min((elapsed / holdDuration) * 100, 100);
       setProgress(newProgress);
-    }, 16);
-  }, [holdDuration, onConfirm, onClose, resetState, requirePassword, passwordVerified]);
+
+      if (elapsed < holdDuration && holdTimeoutRef.current) {
+        progressIntervalRef.current = requestAnimationFrame(updateProgress) as unknown as NodeJS.Timeout;
+      }
+    };
+
+    progressIntervalRef.current = requestAnimationFrame(updateProgress) as unknown as NodeJS.Timeout;
+  }, [holdDuration, onConfirm, onClose, resetState, requiredAndVerified]);
 
   const handleEnd = useCallback(() => {
     resetHoldState();
@@ -98,27 +106,23 @@ export default function PressHoldModal({
     if (!encryptedPayload || !password.trim()) return;
 
     setPasswordError(null);
+    setVerifying(true);
     try {
       await decryptToString(encryptedPayload, password);
       setPasswordVerified(true);
     } catch {
       setPasswordError("Invalid password");
       setPasswordVerified(false);
+    } finally {
+      setVerifying(false);
     }
   }, [encryptedPayload, password]);
 
   const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
+    const newPassword = e.target.value;
+    setPassword(newPassword);
     setPasswordError(null);
   }, []);
-
-  const handlePasswordSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      verifyPassword();
-    },
-    [verifyPassword]
-  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -158,61 +162,60 @@ export default function PressHoldModal({
           <p className="muted">{description}</p>
 
           {requiredAndVerified && (
-            <form onSubmit={handlePasswordSubmit} className="col gap-3 password-form">
+            <div className="col gap-3 password-form">
               <label htmlFor="delete-password" className="label">
                 Enter password to enable deletion
               </label>
-              <div className="row gap-2">
-                <input
-                  id="delete-password"
-                  type="password"
-                  className="input"
-                  value={password}
-                  onChange={handlePasswordChange}
-                  placeholder="Enter your password"
-                  required
-                  autoComplete="current-password"
-                />
-                <button type="submit" disabled={!password.trim()} className="btn btn-primary">
-                  Verify
-                </button>
-              </div>
-              {passwordError && (
-                <p role="alert" className="error text-sm">
-                  {passwordError}
-                </p>
-              )}
-            </form>
+              <input
+                id="delete-password"
+                type="password"
+                className="input"
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+            </div>
           )}
 
           <div className="press-hold-container">
-            <button
-              className={`press-hold-button ${isHolding ? "holding" : ""} ${requiredAndVerified ? "disabled" : ""}`}
-              onMouseDown={handleStart}
-              onMouseUp={handleEnd}
-              onMouseLeave={handleEnd}
-              onTouchStart={handleStart}
-              onTouchEnd={handleEnd}
-              disabled={requiredAndVerified}
-              style={{
-                background: `linear-gradient(to right, var(--color-danger) ${progress}%, transparent ${progress}%)`,
-                opacity: requiredAndVerified ? 0.5 : 1,
-                cursor: requiredAndVerified ? "not-allowed" : "pointer",
-              }}
-              aria-label="Press and hold to confirm deletion"
-            >
-              <span className="press-hold-text">
-                {requiredAndVerified
-                  ? "Verify password to enable"
-                  : isHolding
-                    ? "Keep holding to confirm..."
-                    : confirmText}
-              </span>
-              <div className="press-hold-progress" style={{ width: `${progress}%` }} />
-            </button>
+            {requiredAndVerified ? (
+              <button
+                className="btn btn-primary press-hold-button press-hold-verify-button"
+                onClick={verifyPassword}
+                disabled={!password.trim() || verifying}
+                aria-label="Verify password"
+              >
+                <span className="press-hold-text">{verifying ? "Verifying..." : "Verify Password"}</span>
+              </button>
+            ) : (
+              <button
+                className={`press-hold-button ${isHolding ? "holding" : ""}`}
+                onMouseDown={handleStart}
+                onMouseUp={handleEnd}
+                onMouseLeave={handleEnd}
+                onTouchStart={handleStart}
+                onTouchEnd={handleEnd}
+                style={{
+                  background: `linear-gradient(to right, var(--color-danger) ${progress}%, transparent ${progress}%)`,
+                }}
+                aria-label="Press and hold to confirm deletion"
+              >
+                <span className="press-hold-text">{isHolding ? "Keep holding to confirm..." : confirmText}</span>
+                <div className="press-hold-progress" style={{ width: `${progress}%` }} />
+              </button>
+            )}
           </div>
+
+          {passwordError && (
+            <p role="alert" className="error text-sm">
+              {passwordError}
+            </p>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+export default memo(PressHoldModal);
