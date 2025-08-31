@@ -41,6 +41,13 @@ expect.extend({
       message: () => `Expected element ${pass ? "not " : ""}to be disabled`,
     };
   },
+  toHaveClass(received: any, className: string) {
+    const pass = received?.classList?.contains(className) === true;
+    return {
+      pass,
+      message: () => `Expected element ${pass ? "not " : ""}to have class ${className}`,
+    };
+  },
 });
 
 // -- Cleanup --
@@ -56,5 +63,6 @@ declare module "vitest" {
     toHaveTextContent(text: string | RegExp): T;
     toHaveValue(value: string): T;
     toBeDisabled(): T;
+    toHaveClass(className: string): T;
   }
 }

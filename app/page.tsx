@@ -57,7 +57,9 @@ export default function Page() {
             </svg>
           </button>
         </div>
-        <WalletList wallets={wallets} onRemove={removeWallet} isLoading={isLoading} />
+        <div className="section-content">
+          <WalletList wallets={wallets} onRemove={removeWallet} isLoading={isLoading} />
+        </div>
       </section>
 
       {showCreateModal && (
@@ -71,8 +73,8 @@ export default function Page() {
                 aria-label="Close modal"
               >
                 <svg
-                  width="20"
-                  height="20"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

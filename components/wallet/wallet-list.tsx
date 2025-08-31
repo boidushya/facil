@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useToast } from "@/components/toast";
+import PressHoldModal from "@/components/wallet/press-hold-modal";
 import { useBalances } from "@/hooks/use-balances";
 import { decryptToString } from "@/lib/crypto";
 import type { StoredWallet } from "@/lib/storage";
@@ -24,6 +25,7 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
   const [revealed, setRevealed] = useState<string | null>(null);
   const [revealError, setRevealError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleCopyAddress = useCallback(async () => {
     try {
@@ -53,6 +55,12 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
       setRevealError(null);
     }
   }, [showReveal]);
+
+  const handleDeleteWallet = useCallback(() => {
+    onRemove(w.id);
+    setShowDeleteModal(false);
+    addToast("Wallet removed", "success");
+  }, [w.id, onRemove, addToast]);
 
   async function handleReveal(e: React.FormEvent) {
     e.preventDefault();
@@ -157,7 +165,11 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
               </>
             )}
           </button>
-          <button className="btn btn-danger btn-sm row gap-1" onClick={() => onRemove(w.id)} aria-label="Remove wallet">
+          <button
+            className="btn btn-danger btn-sm row gap-1"
+            onClick={() => setShowDeleteModal(true)}
+            aria-label="Remove wallet"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -294,6 +306,16 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
           ) : null}
         </form>
       )}
+
+      <PressHoldModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteWallet}
+        title="Remove wallet"
+        description={`Are you sure you want to remove the wallet "${w.label || shortenAddress(w.address)}"? This action cannot be undone.`}
+        confirmText="Hold to delete"
+        holdDuration={1500}
+      />
     </li>
   );
 }

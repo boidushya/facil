@@ -121,6 +121,11 @@ body {
   margin-bottom: 3rem;
 }
 
+.section-content{
+	position:relative;
+	min-height: 12rem;
+}
+
 .section h2.section-title {
   color: var(--color-fg);
   font-size: 1.5rem;
@@ -309,7 +314,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem 0;
+  padding: 1rem 1.25rem 0;
   margin-bottom: 1rem;
 }
 
@@ -325,6 +330,10 @@ body {
   border: none;
   background: var(--color-button-bg);
   color: var(--color-fg-alt);
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
 }
 
 .modal-close:hover {
@@ -338,6 +347,67 @@ body {
   border-radius: 0;
   border: none;
   border-top: 1px solid var(--color-border);
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+/* -- PRESS AND HOLD COMPONENT -- */
+
+.press-hold-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.press-hold-button {
+  position: relative;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-danger);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.press-hold-button:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.press-hold-button.holding {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  transform: scale(0.98);
+}
+
+.press-hold-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mix-blend-mode: difference;
+}
+
+.press-hold-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--color-danger);
+  transition: width 0.016s linear;
+  z-index: 1;
 }
 
 /* -- TOAST COMPONENTS -- */
@@ -472,6 +542,11 @@ body {
 .row {
   display: flex;
   align-items: center;
+}
+
+.col {
+	display: flex;
+	flex-direction: column;
 }
 
 .row-between {

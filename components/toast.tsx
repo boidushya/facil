@@ -107,20 +107,11 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   };
 
   return (
-    <div
-      className={`toast toast-${toast.type} ${isExiting ? "toast-exit" : ""}`}
-      role="alert"
-      aria-live="polite"
-    >
+    <div className={`toast toast-${toast.type} ${isExiting ? "toast-exit" : ""}`} role="alert" aria-live="polite">
       <div className="toast-content">
         <div className="toast-icon">{getIcon()}</div>
         <p className="toast-message">{toast.message}</p>
-        <button
-          className="toast-close"
-          onClick={handleRemove}
-          aria-label="Close notification"
-          type="button"
-        >
+        <button className="toast-close" onClick={handleRemove} aria-label="Close notification" type="button">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

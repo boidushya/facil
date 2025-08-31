@@ -150,13 +150,16 @@ describe("WalletList", () => {
       expect(screen.getByRole("button", { name: /remove.*wallet/i })).toBeInTheDocument();
     });
 
-    it("should call onRemove when remove button clicked", () => {
+    it("should open confirmation modal when remove button clicked", () => {
       const wallet = createMockWallet();
       renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
 
-      expect(mockOnRemove).toHaveBeenCalledWith(wallet.id);
+      expect(screen.getByText("Remove wallet")).toBeInTheDocument();
+      expect(screen.getByText(/are you sure you want to remove/i)).toBeInTheDocument();
+      expect(screen.getByText("Hold to delete")).toBeInTheDocument();
+      expect(mockOnRemove).not.toHaveBeenCalled();
     });
 
     it("should copy address to clipboard", () => {
@@ -178,6 +181,29 @@ describe("WalletList", () => {
 
       expect(screen.getByText(/enter password to reveal/i)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /hide.*private.*key.*form/i })).toBeInTheDocument();
+    });
+
+    it("should close modal when close button clicked", () => {
+      const wallet = createMockWallet();
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
+      expect(screen.getByText("Remove wallet")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByLabelText("Close modal"));
+      expect(screen.queryByText("Remove wallet")).not.toBeInTheDocument();
+    });
+
+    it("should close modal when overlay clicked", () => {
+      const wallet = createMockWallet();
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
+      expect(screen.getByText("Remove wallet")).toBeInTheDocument();
+
+      const overlay = document.querySelector(".modal-overlay");
+      fireEvent.click(overlay!);
+      expect(screen.queryByText("Remove wallet")).not.toBeInTheDocument();
     });
   });
 
