@@ -1,5 +1,5 @@
 import { useBalances } from "@/hooks/use-balances";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // -- Mock SWR --

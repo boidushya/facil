@@ -10,7 +10,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       reporter: ["text", "json", "html"],
-      exclude: ["node_modules/", "__tests__/", "*.config.*", ".next/", "coverage/"],
+      exclude: ["node_modules/", "__tests__/", "*.config.*", ".next/", "coverage/", "next-env.d.ts"],
     },
   },
 });
