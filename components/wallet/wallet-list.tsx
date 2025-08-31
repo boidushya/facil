@@ -49,7 +49,6 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
   const handleToggleReveal = useCallback(() => {
     setShowReveal(s => !s);
     if (showReveal) {
-      // Hide the form - reset states
       setPassword("");
       setRevealed(null);
       setRevealError(null);
@@ -69,7 +68,7 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
     try {
       const pk = await decryptToString(w.enc, password);
       setRevealed(pk);
-      setPassword(""); // Clear password after successful reveal
+      setPassword("");
     } catch (_err) {
       setRevealed(null);
       setRevealError("Invalid password or corrupted data.");
@@ -312,9 +311,11 @@ function WalletItem({ w, onRemove }: { w: StoredWallet; onRemove: (id: string) =
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteWallet}
         title="Remove wallet"
-        description={`Are you sure you want to remove the wallet "${w.label || shortenAddress(w.address)}"? This action cannot be undone.`}
+        description={`Are you sure you want to remove the wallet "${w.label || shortenAddress(w.address)}"? This action is permanent & cannot be undone.`}
         confirmText="Hold to delete"
         holdDuration={1500}
+        encryptedPayload={w.enc}
+        requirePassword={true}
       />
     </li>
   );

@@ -176,6 +176,10 @@ body {
   margin-bottom: 0;
 }
 
+.password-form{
+	margin: 0.75rem 0;
+}
+
 .label {
   display: block;
   font-size: 0.875rem;

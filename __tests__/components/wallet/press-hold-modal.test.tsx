@@ -1,6 +1,14 @@
 import PressHoldModal from "@/components/wallet/press-hold-modal";
+import type { EncryptedPayload } from "@/lib/crypto";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Mock crypto module
+vi.mock("@/lib/crypto", () => ({
+  decryptToString: vi.fn(),
+}));
+
+const { decryptToString } = await import("@/lib/crypto");
 
 // Mock timer functions
 vi.useFakeTimers();
@@ -14,9 +22,17 @@ describe("PressHoldModal", () => {
     description: "Test description",
   };
 
+  const mockEncryptedPayload: EncryptedPayload = {
+    ct: "mock-ciphertext",
+    iv: "mock-iv", 
+    salt: "mock-salt",
+    ver: 1,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.clearAllTimers();
+    vi.mocked(decryptToString).mockResolvedValue("mock-private-key");
   });
 
   afterEach(() => {
@@ -222,5 +238,212 @@ describe("PressHoldModal", () => {
     });
 
     expect(defaultProps.onConfirm).not.toHaveBeenCalled();
+  });
+
+  describe("password verification", () => {
+    it("should not show password form when requirePassword is false", () => {
+      render(<PressHoldModal {...defaultProps} requirePassword={false} />);
+
+      expect(screen.queryByLabelText(/enter password to enable/i)).not.toBeInTheDocument();
+    });
+
+    it("should show password form when requirePassword is true", () => {
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload} 
+        />
+      );
+
+      expect(screen.getByLabelText(/enter password to enable/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /verify/i })).toBeInTheDocument();
+    });
+
+    it("should disable hold button initially when password required", () => {
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      const holdButton = screen.getByLabelText("Press and hold to confirm deletion");
+      expect(holdButton).toBeDisabled();
+      expect(screen.getByText("Verify password to enable")).toBeInTheDocument();
+    });
+
+    it("should disable verify button when password is empty", () => {
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      const verifyButton = screen.getByRole("button", { name: /verify/i });
+      expect(verifyButton).toBeDisabled();
+    });
+
+    it("should enable verify button when password is entered", () => {
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      fireEvent.change(screen.getByLabelText(/enter password to enable/i), { 
+        target: { value: "test password" } 
+      });
+
+      const verifyButton = screen.getByRole("button", { name: /verify/i });
+      expect(verifyButton).not.toBeDisabled();
+    });
+
+    it("should show error for invalid password", async () => {
+      vi.useRealTimers();
+      vi.mocked(decryptToString).mockRejectedValue(new Error("Decryption failed"));
+      
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      fireEvent.change(screen.getByLabelText(/enter password to enable/i), { 
+        target: { value: "wrong password" } 
+      });
+      
+      fireEvent.click(screen.getByRole("button", { name: /verify/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(/invalid password/i);
+      });
+
+      const holdButton = screen.getByLabelText("Press and hold to confirm deletion");
+      expect(holdButton).toBeDisabled();
+      vi.useFakeTimers();
+    });
+
+    it("should enable hold button after successful password verification", async () => {
+      vi.useRealTimers();
+      
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+          confirmText="Hold to delete"
+        />
+      );
+
+      fireEvent.change(screen.getByLabelText(/enter password to enable/i), { 
+        target: { value: "correct password" } 
+      });
+      
+      fireEvent.click(screen.getByRole("button", { name: /verify/i }));
+
+      await waitFor(() => {
+        const holdButton = screen.getByLabelText("Press and hold to confirm deletion");
+        expect(holdButton).not.toBeDisabled();
+        expect(screen.getByText("Hold to delete")).toBeInTheDocument();
+      });
+
+      expect(decryptToString).toHaveBeenCalledWith(mockEncryptedPayload, "correct password");
+      vi.useFakeTimers();
+    });
+
+    it("should hide password form after successful verification", async () => {
+      vi.useRealTimers();
+      
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      expect(screen.getByLabelText(/enter password to enable/i)).toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText(/enter password to enable/i), { 
+        target: { value: "correct password" } 
+      });
+      
+      fireEvent.click(screen.getByRole("button", { name: /verify/i }));
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText(/enter password to enable/i)).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /verify/i })).not.toBeInTheDocument();
+      });
+      
+      vi.useFakeTimers();
+    });
+
+    it("should reset password state when modal is closed and reopened", () => {
+      const { rerender } = render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      fireEvent.change(screen.getByLabelText(/enter password to enable/i), { 
+        target: { value: "test" } 
+      });
+
+      rerender(
+        <PressHoldModal 
+          {...defaultProps} 
+          isOpen={false}
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      rerender(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+        />
+      );
+
+      expect(screen.getByLabelText(/enter password to enable/i)).toHaveValue("");
+    });
+
+    it("should prevent hold action when password is not verified", () => {
+      render(
+        <PressHoldModal 
+          {...defaultProps} 
+          requirePassword={true}
+          encryptedPayload={mockEncryptedPayload}
+          holdDuration={1000}
+        />
+      );
+
+      const holdButton = screen.getByLabelText("Press and hold to confirm deletion");
+
+      // Try to start holding (should not work since password not verified)
+      act(() => {
+        fireEvent.mouseDown(holdButton);
+      });
+
+      expect(holdButton).not.toHaveClass("holding");
+      
+      // Advance time to where hold would complete
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(defaultProps.onConfirm).not.toHaveBeenCalled();
+    });
   });
 });
