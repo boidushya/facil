@@ -5,16 +5,21 @@ import { type StoredWallet, getWallets, saveWallets } from "@/lib/storage";
 
 export function useWallets() {
   const [wallets, setWallets] = useState<StoredWallet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Load from localStorage on mount
-    setWallets(getWallets());
+    const loadedWallets = getWallets();
+    setWallets(loadedWallets);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    // Persist whenever wallets change
-    saveWallets(wallets);
-  }, [wallets]);
+    // Persist whenever wallets change (but not during initial load)
+    if (!isLoading) {
+      saveWallets(wallets);
+    }
+  }, [wallets, isLoading]);
 
   function addWallet(w: StoredWallet) {
     setWallets(prev => [w, ...prev]);
@@ -24,5 +29,5 @@ export function useWallets() {
     setWallets(prev => prev.filter(w => w.id !== id));
   }
 
-  return { wallets, addWallet, removeWallet };
+  return { wallets, addWallet, removeWallet, isLoading };
 }

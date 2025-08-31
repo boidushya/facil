@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type React from "react";
 import { Suspense } from "react";
+import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,7 +27,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <Suspense fallback={null}>{children}</Suspense>
+        <ToastProvider>
+          <Suspense fallback={null}>{children}</Suspense>
+        </ToastProvider>
       </body>
     </html>
   );

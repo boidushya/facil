@@ -95,9 +95,19 @@ describe("useWallets hook", () => {
     expect(result.current).toHaveProperty("wallets");
     expect(result.current).toHaveProperty("addWallet");
     expect(result.current).toHaveProperty("removeWallet");
+    expect(result.current).toHaveProperty("isLoading");
 
     expect(Array.isArray(result.current.wallets)).toBe(true);
     expect(typeof result.current.addWallet).toBe("function");
     expect(typeof result.current.removeWallet).toBe("function");
+    expect(typeof result.current.isLoading).toBe("boolean");
+  });
+
+  it("should start with isLoading true and become false after initialization", () => {
+    const { result } = renderHook(() => useWallets());
+
+    // Initially loading should be false after the effect runs
+    expect(result.current.isLoading).toBe(false);
+    expect(getWallets).toHaveBeenCalled();
   });
 });

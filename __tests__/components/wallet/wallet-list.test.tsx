@@ -1,7 +1,9 @@
+import { ToastProvider } from "@/components/toast";
 import WalletList from "@/components/wallet/wallet-list";
 import type { EncryptedPayload } from "@/lib/crypto";
 import type { StoredWallet } from "@/lib/storage";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // -- Mock dependencies --
@@ -15,6 +17,7 @@ vi.mock("@/lib/crypto", () => ({
 
 vi.mock("@/lib/utils", () => ({
   shortenAddress: vi.fn((addr: string) => `${addr.slice(0, 6)}…${addr.slice(-4)}`),
+  formatRelativeTime: vi.fn((_date: Date | string) => "2d ago"),
 }));
 
 // -- Mock navigator.clipboard --
@@ -42,6 +45,10 @@ const createMockWallet = (overrides: Partial<StoredWallet> = {}): StoredWallet =
   ...overrides,
 });
 
+const renderWithToast = (ui: React.ReactElement) => {
+  return render(<ToastProvider>{ui}</ToastProvider>);
+};
+
 describe("WalletList", () => {
   const mockOnRemove = vi.fn();
 
@@ -65,23 +72,30 @@ describe("WalletList", () => {
 
   describe("empty state", () => {
     it("should show placeholder message when no wallets", () => {
-      render(<WalletList wallets={[]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[]} onRemove={mockOnRemove} />);
 
       expect(screen.getByText(/no wallets yet/i)).toBeInTheDocument();
       expect(screen.getByText(/create one above to get started/i)).toBeInTheDocument();
     });
 
     it("should not render list when empty", () => {
-      render(<WalletList wallets={[]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[]} onRemove={mockOnRemove} />);
 
       expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    });
+
+    it("should show loader when isLoading is true", () => {
+      renderWithToast(<WalletList wallets={[]} onRemove={mockOnRemove} isLoading={true} />);
+
+      expect(screen.getByRole("loader")).toBeInTheDocument();
+      expect(screen.queryByText(/no wallets yet/i)).not.toBeInTheDocument();
     });
   });
 
   describe("wallet list rendering", () => {
     it("should render single wallet", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getByRole("list")).toBeInTheDocument();
       expect(screen.getByRole("listitem")).toBeInTheDocument();
@@ -102,7 +116,7 @@ describe("WalletList", () => {
         }),
       ];
 
-      render(<WalletList wallets={wallets} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={wallets} onRemove={mockOnRemove} />);
 
       expect(screen.getByRole("list")).toBeInTheDocument();
       expect(screen.getAllByRole("listitem")).toHaveLength(2);
@@ -112,7 +126,7 @@ describe("WalletList", () => {
 
     it("should render wallet without label", () => {
       const wallet = createMockWallet({ label: undefined });
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getByText(/0x742d…3456/)).toBeInTheDocument();
       expect(screen.queryByText("Test Wallet")).not.toBeInTheDocument();
@@ -120,7 +134,7 @@ describe("WalletList", () => {
 
     it("should render creation date", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getByText(/created/i)).toBeInTheDocument();
     });
@@ -129,7 +143,7 @@ describe("WalletList", () => {
   describe("wallet actions", () => {
     it("should render action buttons", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getByRole("button", { name: /copy.*address/i })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /show.*private.*key.*form/i })).toBeInTheDocument();
@@ -138,7 +152,7 @@ describe("WalletList", () => {
 
     it("should call onRemove when remove button clicked", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /remove.*wallet/i }));
 
@@ -147,7 +161,7 @@ describe("WalletList", () => {
 
     it("should copy address to clipboard", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /copy.*address/i }));
 
@@ -156,7 +170,7 @@ describe("WalletList", () => {
 
     it("should toggle reveal key form", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.queryByText(/enter password to reveal/i)).not.toBeInTheDocument();
 
@@ -178,7 +192,7 @@ describe("WalletList", () => {
       });
 
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getAllByText(/loading…/i)).toHaveLength(2);
     });
@@ -193,14 +207,14 @@ describe("WalletList", () => {
       });
 
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getAllByText(/failed to load/i)).toHaveLength(2);
     });
 
     it("should show balance data", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(screen.getByText("1.5 ETH")).toBeInTheDocument();
       expect(screen.getByText("0.8 BNB")).toBeInTheDocument();
@@ -210,7 +224,7 @@ describe("WalletList", () => {
 
     it("should call useBalances with wallet address", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       expect(useBalances).toHaveBeenCalledWith(wallet.address);
     });
@@ -219,7 +233,7 @@ describe("WalletList", () => {
   describe("private key revelation", () => {
     it("should show password form when reveal clicked", () => {
       const wallet = createMockWallet();
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
 
@@ -233,7 +247,7 @@ describe("WalletList", () => {
 
       vi.mocked(decryptToString).mockResolvedValue(mockPrivateKey);
 
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
       fireEvent.change(screen.getByLabelText(/enter password to reveal/i), { target: { value: "password123" } });
@@ -253,7 +267,7 @@ describe("WalletList", () => {
 
       vi.mocked(decryptToString).mockRejectedValue(new Error("Decryption failed"));
 
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
       fireEvent.change(screen.getByLabelText(/enter password to reveal/i), { target: { value: "wrongpassword" } });
@@ -272,7 +286,7 @@ describe("WalletList", () => {
 
       vi.mocked(decryptToString).mockResolvedValue(mockPrivateKey);
 
-      render(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={[wallet]} onRemove={mockOnRemove} />);
 
       fireEvent.click(screen.getByRole("button", { name: /show.*private.*key.*form/i }));
       fireEvent.change(screen.getByLabelText(/enter password to reveal/i), { target: { value: "password123" } });
@@ -301,7 +315,7 @@ describe("WalletList", () => {
         }),
       ];
 
-      render(<WalletList wallets={wallets} onRemove={mockOnRemove} />);
+      renderWithToast(<WalletList wallets={wallets} onRemove={mockOnRemove} />);
 
       const revealButtons = screen.getAllByRole("button", { name: /show.*private.*key.*form/i });
       expect(revealButtons).toHaveLength(2);

@@ -6,7 +6,7 @@ import { useWallets } from "@/hooks/use-wallets";
 import { useState } from "react";
 
 export default function Page() {
-  const { wallets, addWallet, removeWallet } = useWallets();
+  const { wallets, addWallet, removeWallet, isLoading } = useWallets();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
@@ -28,8 +28,8 @@ export default function Page() {
           <span>Fácil - Your Wallet Keeper</span>
         </h1>
         <p className="lead muted">
-          Generate EVM-compatible wallets, store them securely, and view balances on testnets. Private keys are
-          encrypted with your password and stored in your browser only.
+          Privacy-first wallet management - Generate, secure, and manage your crypto wallets with complete
+          confidentiality.
         </p>
       </header>
 
@@ -57,7 +57,7 @@ export default function Page() {
             </svg>
           </button>
         </div>
-        <WalletList wallets={wallets} onRemove={removeWallet} />
+        <WalletList wallets={wallets} onRemove={removeWallet} isLoading={isLoading} />
       </section>
 
       {showCreateModal && (

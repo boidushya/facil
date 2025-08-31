@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
 import Page from "@/app/page";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/hooks/use-wallets", () => ({
   useWallets: vi.fn(() => ({
@@ -37,7 +37,7 @@ describe("Page", () => {
 
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByText("Fácil - Your Wallet Keeper")).toBeInTheDocument();
-    expect(screen.getByText(/Generate EVM-compatible wallets/)).toBeInTheDocument();
+    expect(screen.getByText(/Privacy-first wallet management/)).toBeInTheDocument();
     expect(screen.getByText("Your wallets")).toBeInTheDocument();
   });
 
