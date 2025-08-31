@@ -108,7 +108,6 @@ describe("Page", () => {
     fireEvent.click(screen.getByLabelText("Create new wallet"));
     fireEvent.click(screen.getByText("Create Wallet"));
 
-    // Verify modal was handled (it should close)
     expect(screen.queryByText("Create a wallet")).not.toBeInTheDocument();
   });
 
