@@ -34,10 +34,9 @@ const ToastItem = memo(function ToastItem({ toast, onRemove }: { toast: Toast; o
     setIsExiting(true);
     setTimeout(() => {
       onRemove(toast.id);
-    }, 200); // Match exit animation duration
+    }, 200);
   }, [toast.id, onRemove]);
 
-  // Auto-remove after duration
   useEffect(() => {
     const timer = setTimeout(() => {
       handleRemove();

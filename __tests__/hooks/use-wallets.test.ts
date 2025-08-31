@@ -106,7 +106,6 @@ describe("useWallets hook", () => {
   it("should start with isLoading true and become false after initialization", () => {
     const { result } = renderHook(() => useWallets());
 
-    // Initially loading should be false after the effect runs
     expect(result.current.isLoading).toBe(false);
     expect(getWallets).toHaveBeenCalled();
   });

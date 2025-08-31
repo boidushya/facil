@@ -8,14 +8,12 @@ export function useWallets() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load from localStorage on mount
     const loadedWallets = getWallets();
     setWallets(loadedWallets);
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    // Persist whenever wallets change (but not during initial load)
     if (!isLoading) {
       saveWallets(wallets);
     }

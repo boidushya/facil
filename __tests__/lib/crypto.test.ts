@@ -25,7 +25,6 @@ Object.defineProperty(global, "crypto", {
 describe("crypto utilities", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset mocks to default behavior
     mockCrypto.subtle.importKey.mockResolvedValue({ type: "secret" } as CryptoKey);
     mockCrypto.subtle.deriveKey.mockResolvedValue({ type: "secret" } as CryptoKey);
     mockCrypto.subtle.encrypt.mockResolvedValue(new ArrayBuffer(32));
