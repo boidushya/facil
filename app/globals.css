@@ -860,7 +860,7 @@ body {
   flex-shrink: 0;
   border: 1px solid var(--color-border);
 	margin-right: 0.5rem;
-	mask-image: radial-gradient(circle at 12px 12px, rgba(0,0,0,1), rgba(0,0,0,0.1));
+	mask-image: radial-gradient(circle at 12px 12px, rgba(0,0,0,1), rgba(0,0,0,0.175));
 }
 
 @media (max-width: 480px) {
