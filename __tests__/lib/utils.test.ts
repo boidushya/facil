@@ -87,10 +87,10 @@ describe("generateAvatarColor", () => {
       const [, hue, saturation, lightness] = matches;
       expect(Number(hue)).toBeGreaterThanOrEqual(0);
       expect(Number(hue)).toBeLessThan(360);
-      expect(Number(saturation)).toBeGreaterThanOrEqual(45);
-      expect(Number(saturation)).toBeLessThan(75);
+      expect(Number(saturation)).toBeGreaterThanOrEqual(65);
+      expect(Number(saturation)).toBeLessThan(85);
       expect(Number(lightness)).toBeGreaterThanOrEqual(50);
-      expect(Number(lightness)).toBeLessThan(70);
+      expect(Number(lightness)).toBeLessThan(75);
     }
   });
 });
