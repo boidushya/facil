@@ -35,11 +35,11 @@ function hashString(str: string): number {
 }
 
 function generateSeededColor(seed: string): string {
-	const hash = hashString(seed);
-	const hue = hash % 360;
-	const saturation = 65 + (hash % 20); // 65-85%
-	const lightness = 50 + (hash % 25); // 50-75%
-	return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  const hash = hashString(seed);
+  const hue = hash % 360;
+  const saturation = 65 + (hash % 20); // 65-85%
+  const lightness = 50 + (hash % 25); // 50-75%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
 export function generateAvatarColor(address: string): string {
